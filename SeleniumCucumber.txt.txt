@@ -1,0 +1,125 @@
+Updated ICEPOT Prompt
+Cucumber BDD + Selenium + TestNG Extension
+ICEPOT PROMPT: Generate Cucumber BDD + Selenium + TestNG automation scripts in BDDScriptGenerator-1.0
+==========================================================================================
+
+I - INSTRUCTION
+Right now my extension only writes plain Selenium test code in Java.
+Please make it generate a full Cucumber BDD framework with Selenium
+and TestNG in Java.
+
+The generated output must include ALL of the following files:
+1. A Gherkin feature file (.feature) with Given/When/Then steps.
+2. A Step Definitions Java class with @Given / @When / @Then annotations
+   (io.cucumber.java.en.*).
+3. A Page Object class with WebDriver locators and action methods.
+4. A TestNG Runner class using @CucumberOptions and AbstractTestNGCucumberTests.
+
+Whatever manual test case I provide, the extension should produce all
+4 files in the correct Cucumber BDD + Selenium + TestNG structure.
+
+C - CONTEXT
+- My project is "BDDScriptGenerator-1.0", a Chrome extension by Reshma. It turns
+  manual test cases into automation scripts.
+- [STRICT] Do not change the screen, the Language dropdown, or any
+  existing UI elements.
+- The framework stack is fixed: Cucumber BDD + Selenium WebDriver +
+  TestNG (Java). Do not use JUnit as the runner.
+- Do not change anything for Playwright.
+- Assume Maven project structure. Package name: automation.tests.
+
+E - EXAMPLE
+For a manual test case "Login with valid credentials", generate exactly
+this structure:
+
+--- Feature File (src/test/resources/features/login.feature) ---
+Feature: Login Functionality
+  Scenario: Login with valid credentials
+    Given the user is on the login page
+    When the user enters valid username and password
+    Then the user should be navigated to the dashboard
+
+--- Step Definitions (src/test/java/automation/tests/steps/LoginSteps.java) ---
+package automation.tests.steps;
+import io.cucumber.java.en.*;
+import org.openqa.selenium.WebDriver;
+import automation.tests.pages.LoginPage;
+import automation.tests.utils.DriverFactory;
+
+public class LoginSteps {
+    WebDriver driver = DriverFactory.getDriver();
+    LoginPage loginPage = new LoginPage(driver);
+
+    @Given("the user is on the login page")
+    public void userIsOnLoginPage() { loginPage.navigateTo(); }
+
+    @When("the user enters valid username and password")
+    public void userEntersCredentials() { loginPage.enterCredentials("admin", "admin123"); }
+
+    @Then("the user should be navigated to the dashboard")
+    public void userIsOnDashboard() { loginPage.verifyDashboard(); }
+}
+
+--- Page Object (src/test/java/automation/tests/pages/LoginPage.java) ---
+package automation.tests.pages;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.testng.Assert;
+
+public class LoginPage {
+    WebDriver driver;
+    @FindBy(id = "username") WebElement usernameField;
+    @FindBy(id = "password") WebElement passwordField;
+    @FindBy(id = "loginBtn")  WebElement loginButton;
+    @FindBy(id = "dashboard") WebElement dashboardHeader;
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+    public void navigateTo() { driver.get("https://example.com/login"); }
+    public void enterCredentials(String user, String pass) {
+        usernameField.sendKeys(user);
+        passwordField.sendKeys(pass);
+        loginButton.click();
+    }
+    public void verifyDashboard() {
+        Assert.assertTrue(dashboardHeader.isDisplayed(), "Dashboard not visible");
+    }
+}
+
+--- TestNG Runner (src/test/java/automation/tests/runner/TestRunner.java) ---
+package automation.tests.runner;
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
+
+@CucumberOptions(
+    features = "src/test/resources/features",
+    glue = "automation.tests.steps",
+    plugin = {"pretty", "html:target/cucumber-reports/report.html"},
+    monochrome = true
+)
+public class TestRunner extends AbstractTestNGCucumberTests {}
+
+The downloaded files should be named and placed as:
+- Feature file:      <TestName>.feature
+- Step Definitions:  <TestName>Steps.java
+- Page Object:       <TestName>Page.java
+- TestNG Runner:     TestRunner.java
+
+If I paste a reference script, match the same page/step naming style
+as the reference.
+
+P - PERSONA
+Act as a careful senior SDET who follows BDD best practices, writes
+clean Page Object Model code, and never breaks existing functionality.
+
+O - OUTPUT
+- Generate all 4 files with correct package declarations and imports.
+- Tell me in simple words which files were created and what each one does.
+- Confirm that the Cucumber BDD + Selenium + TestNG framework structure
+  is complete and ready to run with Maven (mvn test).
+
+T - TONE
+Simple and clear. Short explanation, no jargon.
